@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Container>
+
+LAYOUT_TOP_DOWN()
+
+Person(Client, "Клиент") #FFD966
+Person(CallCenter, "Кол-центр") #FFD966
+Person(PartnerCallCenter, "Партнёрский кол-центр") #FFD966
+System(ABS, "АБС (Хранилище ставок)") #C9DAF8
+
+System(CRM, "CRM (Кол-центр)") #A2C4C9
+System_Ext(Database, "База данных ставок") #E06666
+System(SFTPServer, "SFTP-сервер") #C9DAF8
+System(APIService, "Сервис API") #A2C4C9
+
+Rel(Client, CallCenter, "Запрос информации о ставках")
+Rel(CallCenter, CRM, "Получение актуальных ставок")
+Rel(CRM, APIService, "Запрос ставок через API")
+Rel(APIService, ABS, "Обновление и передача ставок")
+Rel(ABS, Database, "Хранение ставок")
+Rel(ABS, SFTPServer, "Передача данных в файлах")
+Rel(SFTPServer, PartnerCallCenter, "Получение ставок через SFTP")
+
+@enduml

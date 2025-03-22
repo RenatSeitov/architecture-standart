@@ -1,0 +1,41 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_TOP_DOWN()
+
+' Участники
+Person(Client, "Клиент") #FFD966
+Person(CallCenter, "Кол-центр") #FFD966
+Person(BackOffice, "Бэк-офис") #FFD966
+
+' Системы
+System(ABS, "АБС") #C9DAF8
+System(InternetBank, "Интернет-банк") #A2C4C9
+System(Website, "Сайт") #A2C4C9
+System(CRM, "CRM (Кол-центр)") #C9DAF8
+System(SMSService, "СМС-сервис") #C9DAF8
+System(Kafka, "Kafka (шина событий)") #F9CB9C
+System(RateService, "Сервис ставок") #D9EAD3
+System(DepositService, "Сервис депозитов (фасад к АБС)") #D0E0E3
+System_Ext(Database, "База данных") #E06666
+
+' Взаимодействия
+Rel(Client, InternetBank, "Просмотр ставок, подача заявки")
+Rel(Client, Website, "Подача заявки")
+Rel(InternetBank, RateService, "Получение ставок")
+Rel(Website, RateService, "Получение ставок")
+Rel(RateService, Kafka, "Публикация событий ставок")
+
+Rel(Client, SMSService, "Получение СМС")
+
+Rel(Website, CRM, "Передача заявки")
+Rel(CallCenter, CRM, "Обработка заявки")
+Rel(CRM, Kafka, "Публикация: DepositRequestCreated")
+
+Rel(BackOffice, CRM, "Подтверждение заявки")
+Rel(BackOffice, RateService, "Обновление ставок")
+
+Rel(Kafka, DepositService, "События: заявка создана, ставка обновлена")
+Rel(DepositService, ABS, "Открытие депозита (по API)")
+Rel(DepositService, SMSService, "Отправка уведомления")
+Rel(ABS, Database, "Хранение данных")
+@enduml
